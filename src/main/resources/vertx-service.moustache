@@ -100,8 +100,8 @@ public class {{className}} {
 
         {{#unaryUnaryMethods}}
         {{{methodHeader}}}
-        public void {{methodName}}({{inputType}} request, Future<{{outputType}}> response) {
-            {{grpcServerCallsMethodName}}(get{{methodNamePascalCase}}Method(), toObserver(response.completer()));
+        public void {{methodName}}({{inputType}} request, Handler<AsyncResult<{{outputType}}>> handler) {
+            {{grpcServerCallsMethodName}}(get{{methodNamePascalCase}}Method(), toObserver(handler));
         }
         {{/unaryUnaryMethods}}
         
@@ -114,8 +114,8 @@ public class {{className}} {
         
         {{#manyUnaryMethods}}
         {{{methodHeader}}}
-        public void {{methodName}}(GrpcReadStream<{{inputType}}> request, Future<{{outputType}}> response) {
-            request.setReadObserver({{grpcServerCallsMethodName}}(get{{methodNamePascalCase}}Method(), toObserver(response.completer())));
+        public void {{methodName}}(GrpcReadStream<{{inputType}}> request, Handler<AsyncResult<{{outputType}}>> handler) {
+            request.setReadObserver({{grpcServerCallsMethodName}}(get{{methodNamePascalCase}}Method(), toObserver(handler)));
         }
         {{/manyUnaryMethods}}
         
@@ -158,14 +158,14 @@ public class {{className}} {
             switch (methodId) {
             {{#unaryUnaryMethods}}
                 case METHODID_{{methodNameUpperUnderscore}}:
-                    serviceImpl.{{methodName}}(({{inputType}}) request, (Future<{{outputType}}>) Future.<{{outputType}}>future().setHandler( ar -> {
+                    serviceImpl.{{methodName}}(({{inputType}}) request, ar -> {
                         if (ar.succeeded()) {
                             ((StreamObserver<{{outputType}}>) responseObserver).onNext(ar.result());
                             responseObserver.onCompleted();
                         } else {
                             responseObserver.onError(ar.cause());
                         }
-                    }));
+                    });
                     break;
             {{/unaryUnaryMethods}}
             {{#unaryManyMethods}}
@@ -185,14 +185,14 @@ public class {{className}} {
             {{#manyUnaryMethods}}
                 case METHODID_{{methodNameUpperUnderscore}}:
                     GrpcReadStream<{{inputType}}> request{{methodNumber}} = GrpcReadStream.<{{inputType}}>create();
-                    serviceImpl.{{methodName}}(request{{methodNumber}}, Future.<{{outputType}}>future().setHandler(ar -> {
+                    serviceImpl.{{methodName}}(request{{methodNumber}}, ar -> {
                         if (ar.succeeded()) {
                             ((StreamObserver<{{outputType}}>) responseObserver).onNext(ar.result());
                             responseObserver.onCompleted();
                         } else {
                             responseObserver.onError(ar.cause());
                         }
-                    }));
+                    });
                     return (StreamObserver<I>) request{{methodNumber}}.readObserver();
             {{/manyUnaryMethods}}
             {{#manyManyMethods}}
