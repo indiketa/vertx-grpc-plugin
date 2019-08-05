@@ -1,5 +1,7 @@
 package io.vertx.grpc.plugin;
 
+import com.google.common.base.Strings;
+
 /**
  * @author <a href="mailto:eduard.catala@gmail.com">Eduard Català</a>
  */
@@ -40,49 +42,19 @@ public class MethodMetadata {
         return String.valueOf(Character.toLowerCase(mn.charAt(0))) + mn.substring(1);
     }
 
-    public String manyInputExchange() {
-        if (!isManyInput) {
-            throw new RuntimeException("Input is unary, calling manyInputExchange is a nonsense");
+    public String methodHeader() {
+        String mh = "";
+        if (!Strings.isNullOrEmpty(javaDoc)) {
+            mh = javaDoc;
         }
-        return isManyOutput ? "GrpcBidiExchange" : "GrpcUniExchange";
-    }
 
-    public String clientMethodSignature() {
-        String signature = "";
-        if (isManyInput) {
-            if (isManyOutput) {
-                signature += "Handler<GrpcBidiExchange<" + outputType + ", " + inputType + ">> handler";
-            } else {
-                signature += "Handler<GrpcUniExchange<" + inputType + ", " + outputType + ">> handler";
-            }
-        } else {
-            signature = inputType + " request, ";
-            if (isManyOutput) {
-                signature += "Handler<GrpcReadStream<" + outputType + ">> handler";
-            } else {
-                signature += "Handler<AsyncResult<" + outputType + ">> handler";
-            }
+        if (deprecated) {
+            mh += "\n        @Deprecated";
         }
-        return signature;
-    }
 
-    public String serverMethodSignature() {
-        String signature = "";
-        if (isManyInput) {
-            if (isManyOutput) {
-                signature = "GrpcBidiExchange<" + inputType + ", " + outputType + "> exchange";
-            } else {
-                signature = "GrpcReadStream<" + inputType + "> request, Future<" + outputType + "> response";
-            }
-        } else {
-            signature = inputType + " request, ";
-            if (isManyOutput) {
-                signature += "GrpcWriteStream<" + outputType + "> response";
-            } else {
-                signature += "Future<" + outputType + "> response";
-            }
-        }
-        return signature;
+        mh += "\n        @SuppressWarnings(\"unchecked\")";
+
+        return mh;
     }
 
 }

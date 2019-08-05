@@ -1,4 +1,3 @@
-
 {{#packageName}}
 package {{packageName}};
 {{/packageName}}
@@ -36,7 +35,7 @@ import io.vertx.grpc.GrpcUniExchange;{{#deprecated}}
 @Deprecated{{/deprecated}}
 
 @javax.annotation.Generated(
-    value = "by gRPC JDK 8 - vertx-grpc-plugin",
+    value = "by vertx-grpc-plugin",
     comments = "Source: {{protoName}}")
 public class {{className}} {
 
@@ -61,70 +60,71 @@ public class {{className}} {
         protected {{serviceName}}VertxStub build(Channel channel, CallOptions callOptions) {
             return new {{serviceName}}VertxStub(channel, callOptions);
         }
-        {{#methods}}
 
-            {{#javaDoc}}
-        {{{javaDoc}}}
-            {{/javaDoc}}
-            {{#deprecated}}
-        @java.lang.Deprecated
-            {{/deprecated}}
-        @SuppressWarnings("unchecked")
-        public void {{methodName}}({{{clientMethodSignature}}}) {
-            {{^isManyInput}}
-                {{^isManyOutput}}
-                {{grpcCallsMethodName}}(getChannel().newCall(get{{methodNamePascalCase}}Method(), getCallOptions()), request, toObserver(handler));
-                {{/isManyOutput}}
-                {{#isManyOutput}}
-                GrpcReadStream<{{outputType}}> rs = GrpcReadStream.<{{outputType}}>create();
-                handler.handle(rs);
-                {{grpcCallsMethodName}}(getChannel().newCall(get{{methodNamePascalCase}}Method(), getCallOptions()), request, rs.readObserver());
-                {{/isManyOutput}}
-            {{/isManyInput}}
-            {{#isManyInput}}
-                GrpcReadStream<{{outputType}}> rs = GrpcReadStream.<{{outputType}}>create();
-                {{^isManyOutput}}
-                handler.handle(GrpcUniExchange.create(rs, {{grpcCallsMethodName}}(getChannel().newCall(get{{methodNamePascalCase}}Method(), getCallOptions()), rs.readObserver())));
-                {{/isManyOutput}}
-                {{#isManyOutput}}
-                handler.handle(GrpcBidiExchange.create(rs, {{grpcCallsMethodName}}(getChannel().newCall(get{{methodNamePascalCase}}Method(), getCallOptions()), rs.readObserver())));
-                {{/isManyOutput}}
-            {{/isManyInput}}
+        {{#unaryUnaryMethods}}
+        {{{methodHeader}}}
+        public void {{methodName}}({{inputType}} request, Handler<AsyncResult<{{outputType}}>> handler) {
+            {{grpcCallsMethodName}}(getChannel().newCall(get{{methodNamePascalCase}}Method(), getCallOptions()), request, toObserver(handler));
         }
-        {{/methods}}
+        {{/unaryUnaryMethods}}
+
+        {{#unaryManyMethods}}
+        {{{methodHeader}}}
+        public void {{methodName}}({{inputType}} request, Handler<GrpcReadStream<{{outputType}}>> handler) {
+            GrpcReadStream<{{outputType}}> rs = GrpcReadStream.<{{outputType}}>create();
+            handler.handle(rs);
+            {{grpcCallsMethodName}}(getChannel().newCall(get{{methodNamePascalCase}}Method(), getCallOptions()), request, rs.readObserver());
+        }
+        {{/unaryManyMethods}}
+
+        {{#manyUnaryMethods}}
+        {{{methodHeader}}}
+        public void {{methodName}}(Handler<GrpcUniExchange<{{inputType}}, {{outputType}}>> handler) {
+            GrpcReadStream<{{outputType}}> rs = GrpcReadStream.<{{outputType}}>create();
+            handler.handle(GrpcUniExchange.create(rs, {{grpcCallsMethodName}}(getChannel().newCall(get{{methodNamePascalCase}}Method(), getCallOptions()), rs.readObserver())));
+        }
+        {{/manyUnaryMethods}}
+
+        {{#manyManyMethods}}
+        {{{methodHeader}}}
+        public void {{methodName}}(Handler<GrpcBidiExchange<{{outputType}}, {{inputType}}>> handler) {
+            GrpcReadStream<{{outputType}}> rs = GrpcReadStream.<{{outputType}}>create();
+            handler.handle(GrpcBidiExchange.create(rs, {{grpcCallsMethodName}}(getChannel().newCall(get{{methodNamePascalCase}}Method(), getCallOptions()), rs.readObserver())));
+        }
+        {{/manyManyMethods}}
     }
 
 
     {{#javaDoc}}{{{javaDoc}}}{{/javaDoc}}
     public static abstract class {{serviceName}}VertxImplBase implements BindableService {
-        {{#methods}}
 
-            {{#javaDoc}}
-        {{{javaDoc}}}
-            {{/javaDoc}}
-            {{#deprecated}}
-        @java.lang.Deprecated
-            {{/deprecated}}
-        @SuppressWarnings("unchecked")
-        public void {{methodName}}({{{serverMethodSignature}}}) {
-            {{^isManyInput}}
-                {{^isManyOutput}}
-                {{grpcServerCallsMethodName}}(get{{methodNamePascalCase}}Method(), toObserver(response.completer()));
-                {{/isManyOutput}}
-                {{#isManyOutput}}
-                {{grpcServerCallsMethodName}}(get{{methodNamePascalCase}}Method(), response.writeObserver());
-                {{/isManyOutput}}
-            {{/isManyInput}}
-            {{#isManyInput}}
-                {{^isManyOutput}}
-                request.setReadObserver({{grpcServerCallsMethodName}}(get{{methodNamePascalCase}}Method(), toObserver(response.completer())));
-                {{/isManyOutput}}
-                {{#isManyOutput}}
-                exchange.setReadObserver({{grpcServerCallsMethodName}}(get{{methodNamePascalCase}}Method(), exchange.writeObserver()));
-                {{/isManyOutput}}
-            {{/isManyInput}}
+        {{#unaryUnaryMethods}}
+        {{{methodHeader}}}
+        public void {{methodName}}({{inputType}} request, Future<{{outputType}}> response) {
+            {{grpcServerCallsMethodName}}(get{{methodNamePascalCase}}Method(), toObserver(response.completer()));
         }
-        {{/methods}}
+        {{/unaryUnaryMethods}}
+        
+        {{#unaryManyMethods}}
+        {{{methodHeader}}}
+        public void {{methodName}}({{inputType}} request, GrpcWriteStream<{{outputType}}> response) {
+            {{grpcServerCallsMethodName}}(get{{methodNamePascalCase}}Method(), response.writeObserver());
+        }
+        {{/unaryManyMethods}}
+        
+        {{#manyUnaryMethods}}
+        {{{methodHeader}}}
+        public void {{methodName}}(GrpcReadStream<{{inputType}}> request, Future<{{outputType}}> response) {
+            request.setReadObserver({{grpcServerCallsMethodName}}(get{{methodNamePascalCase}}Method(), toObserver(response.completer())));
+        }
+        {{/manyUnaryMethods}}
+        
+        {{#manyManyMethods}}
+        {{{methodHeader}}}
+        public void {{methodName}}(GrpcBidiExchange<{{inputType}}, {{outputType}}> exchange) {
+            exchange.setReadObserver({{grpcServerCallsMethodName}}(get{{methodNamePascalCase}}Method(), exchange.writeObserver()));
+        }
+        {{/manyManyMethods}}        
 
         @Override
         public final ServerServiceDefinition bindService() {
