@@ -25,8 +25,8 @@ public class VertxGrpcGenerator {
 
     private static final int SERVICE_NUMBER_OF_PATHS = 2;
     private static final int METHOD_NUMBER_OF_PATHS = 4;
-    private static final String CLASS_PREFIX = "Vertx";
-    private static final String CLASS_SUFFIX = "Grpc";
+    private static final String CLASS_PREFIX = "";
+    private static final String CLASS_SUFFIX = "VertxGrpc";
     private static MustacheFactory mustacheFactory = new DefaultMustacheFactory();
 
     public static List<CodeGeneratorResponse.File> generateFiles(CodeGeneratorRequest request) {
