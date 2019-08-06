@@ -45,6 +45,14 @@ public class {{className}} {
     private static final int METHODID_{{methodNameUpperUnderscore}} = {{methodNumber}};
     {{/methods}}
 
+    public static {{serviceName}}VertxStub new{{serviceName}}VertxStub(Channel channel) {
+        return new {{serviceName}}VertxStub(channel);
+    }
+
+    public static {{serviceName}}VertxStub new{{serviceName}}VertxStub(Channel channel, CallOptions callOptions) {
+        return new {{serviceName}}VertxStub(channel, callOptions);
+    }
+
     {{#javaDoc}}{{{javaDoc}}}{{/javaDoc}}
     public static final class {{serviceName}}VertxStub extends AbstractStub<{{serviceName}}VertxStub> {
 
